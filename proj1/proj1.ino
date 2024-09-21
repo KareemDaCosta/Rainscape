@@ -1,8 +1,3 @@
-/*
-  Display a scrolling image (from image.h) on a TFT
-  Adapted from https://github.com/VolosR/ImageScroll
-*/
-
 #include "TFT_eSPI.h"
 #include "landscape.h"
 #include <Adafruit_GFX.h>
@@ -17,6 +12,7 @@ int screenW=240;
 int screenH=135;
 
 const int numDrops = 100;
+const int raindropHeight = 6;
 
 int raindrops[numDrops][2];
 
@@ -28,13 +24,7 @@ void setup() {
   tft.pushImage(0,0,screenW,screenH,landscape);
 
   for(int i = 0; i < numDrops; i++) {
-    int randX = random(0, screenW);
-    int randY = random(0-screenH+5, 0);
-    raindrops[i][0] = randX;
-    raindrops[i][1] = randY;
-    tft.drawRect(randX, randY, 0, 5, RAIN1);
-    tft.drawRect(randX+1, randY, 0, 5, RAIN2);
-
+    resetRaindrop(i);
   }
 
 }
@@ -47,25 +37,33 @@ void loop() {
 }
 
 void drawRaindrop(int i) {
-  if(raindrops[i][0] < screenW) {
-    if(raindrops[i][1]-1 < screenH) {
-      tft.drawPixel(raindrops[i][0], raindrops[i][1]-1, getPixelFromLandscape(raindrops[i][0], raindrops[i][1]-1));
+
+  if(raindrops[i][1]+raindropHeight > screenH) {
+    for(int y = raindrops[i][1]-1; y < screenH; y++) {
+      tft.drawPixel(raindrops[i][0], y, getPixelFromLandscape(raindrops[i][0], y));
+      tft.drawPixel(raindrops[i][0]+1, y, getPixelFromLandscape(raindrops[i][0], y));
     }
-    if(raindrops[i][1]+6 < screenH) {
-      tft.drawPixel(raindrops[i][0], raindrops[i][1]+6, RAIN1);
-    }
-   }
+    resetRaindrop(i);
+  }
+
+  tft.drawPixel(raindrops[i][0], raindrops[i][1]-1, getPixelFromLandscape(raindrops[i][0], raindrops[i][1]-1));
+  tft.drawPixel(raindrops[i][0], raindrops[i][1]+raindropHeight, RAIN1);
 
   if(raindrops[i][0]+1 < screenW) {
-    if(raindrops[i][1]-1 < screenH) {
-      tft.drawPixel(raindrops[i][0]+1, raindrops[i][1]-1, getPixelFromLandscape(raindrops[i][0]+1, raindrops[i][1]-1));
-    }
-    if(raindrops[i][1]+6 < screenH) {
-      tft.drawPixel(raindrops[i][0]+1, raindrops[i][1]+6, RAIN2);
-    }
+    tft.drawPixel(raindrops[i][0]+1, raindrops[i][1]-1, getPixelFromLandscape(raindrops[i][0]+1, raindrops[i][1]-1));
+    tft.drawPixel(raindrops[i][0]+1, raindrops[i][1]+raindropHeight, RAIN2);
   }
 }
 
 int getPixelFromLandscape(int x, int y) {
   return landscape[screenW * y + x];
+}
+
+void resetRaindrop(int i) {
+    int randX = random(0, screenW);
+    int randY = random(0-screenH+5, 0);
+    raindrops[i][0] = randX;
+    raindrops[i][1] = randY;
+    tft.drawRect(randX, randY, 0, 5, RAIN1);
+    tft.drawRect(randX+1, randY, 0, 5, RAIN2);
 }
