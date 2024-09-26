@@ -4,6 +4,8 @@
 
 #define RAIN1 0x73AE
 #define RAIN2 0x6B4D
+#define rippleLight 0xa554
+#define rippleDark 0x8c51
 
 TFT_eSPI tft= TFT_eSPI();
 TFT_eSprite sprite = TFT_eSprite(&tft);
@@ -15,8 +17,10 @@ const int numDrops = 100;
 const int minRaindropHeight = 6;
 const int maxRaindropHeight = 10;
 const int raindropWidthDivider = 8;
+const int rippleDuration = 30;
 
 int raindrops[numDrops][3];
+int ripples[numDrops][3];
 
 void setup() {
   tft.init();
@@ -34,6 +38,13 @@ void loop() {
   for(int i = 0; i < numDrops; i++) {
     raindrops[i][1] = raindrops[i][1]+1;
     drawRaindrop(i);
+
+    if(ripples[i][2] > 0) {
+      ripples[i][2] -= 1;
+      if(ripples[i][2] == 0) {
+        undoRipple(i);
+      }
+    }
   }
 }
 
@@ -45,6 +56,9 @@ void drawRaindrop(int i) {
       tft.drawPixel(raindrops[i][0], y, getPixelFromLandscape(raindrops[i][0], y));
       if(raindrops[i][2] > raindropWidthDivider) {
         tft.drawPixel(raindrops[i][0]+1, y, getPixelFromLandscape(raindrops[i][0]+1, y));
+      }
+      if(raindrops[i][2] != maxRaindropHeight && shouldDrawRipple(i)) {
+        drawRipple(i);
       }
     }
     resetRaindrop(i);
@@ -85,4 +99,66 @@ bool hitWater(int i) {
   }
   int randNumber = random(screenH/2, screenH * 3);
   return randNumber <= raindrops[i][1];
+}
+
+bool shouldDrawRipple(int i) {
+  if(raindrops[i][0] < 100 && raindrops[i][1]+raindrops[i][2] < 105) {
+    return false;
+  }
+  return true;
+}
+
+bool lightWaterColor(int i) {
+  if(raindrops[i][0] > 100 && raindrops[i][1]+raindrops[i][2] < 105) {
+    return true;
+  }
+  return false;
+}
+
+void drawRipple(int i) {
+  ripples[i][0] = raindrops[i][0];
+  ripples[i][1] = raindrops[i][1] + raindrops[i][2];
+  ripples[i][2] = rippleDuration;
+  int x = ripples[i][0];
+  int y = ripples[i][1];
+  if(!lightWaterColor(i)) {
+    tft.drawPixel(x, y+1, rippleDark);
+    tft.drawPixel(x+1, y, rippleDark);
+    tft.drawPixel(x+2, y, rippleDark);
+    tft.drawPixel(x+3, y, rippleDark);
+    tft.drawPixel(x+4, y, rippleDark);
+    tft.drawPixel(x+5, y+1, rippleDark);
+    tft.drawPixel(x+1, y+2, rippleDark);
+    tft.drawPixel(x+2, y+2, rippleDark);
+    tft.drawPixel(x+3, y+2, rippleDark);
+    tft.drawPixel(x+4, y+2, rippleDark);
+  }
+  else {
+    tft.drawPixel(x, y+1, rippleLight);
+    tft.drawPixel(x+1, y, rippleLight);
+    tft.drawPixel(x+2, y, rippleLight);
+    tft.drawPixel(x+3, y, rippleLight);
+    tft.drawPixel(x+4, y, rippleLight);
+    tft.drawPixel(x+5, y+1, rippleLight);
+    tft.drawPixel(x+1, y+2, rippleLight);
+    tft.drawPixel(x+2, y+2, rippleLight);
+    tft.drawPixel(x+3, y+2, rippleLight);
+    tft.drawPixel(x+4, y+2, rippleLight);
+  }
+}
+
+void undoRipple(int i) {
+  int x = ripples[i][0];
+  int y = ripples[i][1];
+
+  tft.drawPixel(x, y+1, getPixelFromLandscape(x, y+1));
+  tft.drawPixel(x+1, y, getPixelFromLandscape(x+1, y));
+  tft.drawPixel(x+2, y, getPixelFromLandscape(x+2, y));
+  tft.drawPixel(x+3, y, getPixelFromLandscape(x+3, y));
+  tft.drawPixel(x+4, y, getPixelFromLandscape(x+4, y));
+  tft.drawPixel(x+5, y+1, getPixelFromLandscape(x+5, y+1));
+  tft.drawPixel(x+1, y+2, getPixelFromLandscape(x+1, y+2));
+  tft.drawPixel(x+2, y+2, getPixelFromLandscape(x+2, y+2));
+  tft.drawPixel(x+3, y+2, getPixelFromLandscape(x+3, y+2));
+  tft.drawPixel(x+4, y+2, getPixelFromLandscape(x+4, y+2));
 }
