@@ -1,6 +1,6 @@
 # Rainscape
 
-This project is an introduction to coding on a LilyGo TTGO T-display ESP32 through the creation of a simple, calming landscape. The display takes an image of a cloudy lake and adds raindrops and a ripple effect (when the raindrops land on the water) to the image, converting the original image into a dynamic, digital viewscape.
+This project is an introduction to coding on a LilyGo TTGO T-display ESP32 through the creation of a simple, calming landscape. The display takes an image of a cloudy lake and adds raindrops and a ripple effect (when the raindrops land on the water) to the image, converting the original static image into a dynamic, digital viewscape.
 
 ## Project GIF
 ![](https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGcwd2E4NnAwamp3cTc0ZnlsaHpqdjgzdmR1NjFjeThjaGtzY3c3cCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/FPG76PMqcvdcpz8vX8/giphy.gif)
